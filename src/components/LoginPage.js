@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthForm from "./AuthForm";
+import axios from "axios";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState("");
 
-  const handleLogin = (credentials) => {
+  const handleLogin = async (credentials) => {
     const { username, password } = credentials;
-    const storedUsers = localStorage.getItem("users");
+    /* const storedUsers = localStorage.getItem("users");
 
     if (storedUsers) {
       const users = JSON.parse(storedUsers);
@@ -26,6 +27,19 @@ const LoginPage = () => {
       }
     } else {
       setLoginError("등록된 사용자가 없습니다. 먼저 회원가입해주세요.");
+    } */
+    const url = "http://localhost:9000/login";
+
+    try {
+      const response = await axios.get(url, { params: credentials });
+      if (response.status === 200) {
+        localStorage.setItem("loggedIn", true);
+        navigate("/landing-page", {
+          state: { nickname: response.data.nickname },
+        });
+      }
+    } catch (error) {
+      setLoginError(error.response.data.error);
     }
   };
 

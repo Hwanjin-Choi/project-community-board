@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-
+import { Link } from "react-router-dom";
 const FormContainer = styled.div`
   background-color: #fff;
   padding: 30px;
@@ -132,7 +132,8 @@ const AuthForm = ({
         </ErrorMessage>
       )}
       <LinkText>
-        {switchText} <a href={switchLink}>{switchText.split(" ")[2]}</a>
+        {switchText.split(" ").slice(0, -1).join(" ")}{" "}
+        <Link to={switchLink}>{switchText.split(" ").pop()}</Link>
       </LinkText>
     </FormContainer>
   );

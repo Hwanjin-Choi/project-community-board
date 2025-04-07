@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useLocation } from "react-router-dom";
 
 const Container = styled.div`
   text-align: center;
@@ -14,14 +15,13 @@ const Title = styled.h1`
 `;
 
 const LandingPage = () => {
-  const [currentUser, setCurrentUser] = React.useState(
-    JSON.parse(localStorage.getItem("currentUser"))
-  );
-  console.log(currentUser.email);
+  const location = useLocation();
+  const nickname = location.state?.nickname;
+
   return (
     <Container>
       <Title>로그인 성공!</Title>
-      <p>{currentUser.nickname}님, 환영합니다!</p>
+      <p>{nickname}님, 환영합니다!</p>
     </Container>
   );
 };

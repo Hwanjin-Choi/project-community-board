@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthForm from "./AuthForm";
-
+import axios from "axios";
+import Notification from "./Notification";
 const RegistrationPage = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -16,7 +17,7 @@ const RegistrationPage = () => {
   const [signupError, setSignupError] = useState("");
   const [signupSuccess, setSignupSuccess] = useState("");
   const [isSigningUp, setIsSigningUp] = useState(false);
-
+  const [notificationMessage, setNotificationMessage] = useState("");
   const handleSignupSubmit = (formData, setFieldErrors) => {
     const { username, email, password, passwordConfirm, nickname } = formData;
     let isValid = true;
@@ -68,33 +69,29 @@ const RegistrationPage = () => {
     }
 
     setFieldErrors(errors);
+    const registerAction = async () => {
+      const url = "http://localhost:9000/register";
 
+      try {
+        const body = { username, email, password, nickname };
+
+        const result = await axios.post(url, body);
+        if (result.status === 201) {
+          setNotificationMessage(
+            "회원가입이 완료되었습니다. 로그인 페이지로 이동합니다."
+          );
+          setTimeout(() => navigate("/login-page"), 2000); // 성공 메시지 잠시 보여주고 로그인 페이지로 이동
+        }
+      } catch (error) {
+        setSignupError(error.response.data.error);
+      }
+    };
     if (isValid) {
       setIsSigningUp(true);
       setSignupError(""); // 이전 에러 메시지 초기화
-
-      const storedUsers = localStorage.getItem("users");
-      const users = storedUsers ? JSON.parse(storedUsers) : [];
-
-      if (users.some((user) => user.username === username)) {
-        setSignupError("이미 사용 중인 아이디입니다.");
-        setIsSigningUp(false);
-        return;
-      }
-      if (users.some((user) => user.email === email)) {
-        setSignupError("이미 사용 중인 이메일입니다.");
-        setIsSigningUp(false);
-        return;
-      }
-
-      const newUser = { username, email, password, nickname };
-      users.push(newUser);
-      localStorage.setItem("users", JSON.stringify(users));
-      setSignupSuccess(
-        "회원가입이 완료되었습니다. 로그인 페이지로 이동합니다."
-      );
+      registerAction();
       setIsSigningUp(false);
-      setTimeout(() => navigate("/login-page"), 2000); // 성공 메시지 잠시 보여주고 로그인 페이지로 이동
+      /* setTimeout(() => navigate("/login-page"), 2000); // 성공 메시지 잠시 보여주고 로그인 페이지로 이동 */
     }
   };
 
@@ -137,15 +134,18 @@ const RegistrationPage = () => {
   ];
 
   return (
-    <AuthForm
-      title="회원가입"
-      fields={registrationFields}
-      submitText={isSigningUp ? "회원가입 중..." : "회원가입"}
-      onSubmit={handleSignupSubmit}
-      switchText="이미 계정이 있으신가요? 로그인"
-      switchLink="/login-page"
-      generalError={signupError || signupSuccess}
-    />
+    <React.Fragment>
+      <Notification message={notificationMessage} />
+      <AuthForm
+        title="회원가입"
+        fields={registrationFields}
+        submitText={isSigningUp ? "회원가입 중..." : "회원가입"}
+        onSubmit={handleSignupSubmit}
+        switchText="이미 계정이 있으신가요? 로그인"
+        switchLink="/login-page"
+        generalError={signupError || signupSuccess}
+      />
+    </React.Fragment>
   );
 };
 
